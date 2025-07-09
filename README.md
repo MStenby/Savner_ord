@@ -1,35 +1,4 @@
 <html lang="da">
-<head>
-  <meta charset="UTF-8">
-  <title>Savner ord</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      max-width: 600px;
-      margin: 2rem auto;
-      padding: 1rem;
-    }
-    textarea {
-      width: 100%;
-      height: 150px;
-      font-size: 1.2rem;
-    }
-    .mistede {
-      font-weight: bold;
-      color: darkred;
-    }
-    button {
-      margin-right: 1rem;
-      margin-top: 1rem;
-    }
-    .sporgsmal {
-      margin-top: 1rem;
-      background-color: #f0f0f0;
-      padding: 1rem;
-      border-left: 4px solid #999;
-    }
-  </style>
-</head>
 <body>
   <h1>Savner ord</h1>
   <p>Du bruger ikke alle bogstaver altid. Men hvor mange kan du miste, før du mærker, at du savner ord?</p>
