@@ -1,6 +1,5 @@
 <html lang="da">
 <body>
-  <h1>Savner ord</h1>
   <p>Du bruger ikke alle bogstaver altid. Men hvor mange kan du miste, før du mærker, at du savner ord?</p>
 
   <div>
