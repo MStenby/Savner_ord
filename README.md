@@ -1,55 +1,143 @@
+<!DOCTYPE html>
 <html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <title>Savner ord</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      font-size: 1.2rem;
+      display: none;
+    }
+    .mistede {
+      font-weight: bold;
+      color: darkred;
+    }
+    button {
+      margin-right: 1rem;
+      margin-top: 1rem;
+    }
+    .sporgsmal {
+      margin-top: 1rem;
+      background-color: #f0f0f0;
+      padding: 1rem;
+      border-left: 4px solid #999;
+      display: none;
+    }
+    #timer {
+      font-weight: bold;
+      margin-top: 1rem;
+      font-size: 1.1rem;
+    }
+    #tidligereSvarListe {
+      margin-top: 1rem;
+    }
+    .tidligereSvar {
+      background-color: #eef2f5;
+      padding: 1rem;
+      border-left: 4px solid #ccc;
+      font-style: italic;
+      white-space: pre-wrap;
+      margin-bottom: 1rem;
+    }
+    #mistedeContainer {
+      display: none;
+    }
+  </style>
+</head>
 <body>
+  <h1>Savner ord</h1>
   <p>Du bruger ikke alle bogstaver altid. Men hvor mange kan du miste, før du mærker, at du savner ord?</p>
 
   <div>
-    <button onclick="setRound(0)">Start Runde 0</button>
-    <button onclick="setRound(1)">Start Runde 1</button>
-    <button onclick="setRound(2)">Start Runde 2</button>
-    <button onclick="setRound(3)">Start Runde 3</button>
-    <button onclick="resetGame()">Nulstil</button>
+    <button onclick="startAuto()">Start</button>
+    <button id="resetBtn" onclick="resetGame()" style="display:none;">Nulstil</button>
   </div>
 
-  <p>Mistede bogstaver: <span id="forbudteBogstaver" class="mistede"></span></p>
+  <p id="mistedeContainer">Mistede bogstaver: <span id="forbudteBogstaver" class="mistede"></span></p>
+
+  <div id="sporgsmaalsboks" class="sporgsmal">Hvad værdsætter du især ved naturen?</div>
+
   <textarea id="tekstfelt" oninput="checkInput(event)"></textarea>
 
-  <div id="sporgsmaalsboks" class="sporgsmal"></div>
+  <div id="tidligereSvarListe"></div>
+
+  <div id="timer"></div>
 
   <script>
     const tekstfelt = document.getElementById("tekstfelt");
     const forbudtEl = document.getElementById("forbudteBogstaver");
     const sporgsmaalBox = document.getElementById("sporgsmaalsboks");
+    const timerEl = document.getElementById("timer");
+    const tidligereSvarListe = document.getElementById("tidligereSvarListe");
+    const mistedeContainer = document.getElementById("mistedeContainer");
+    const resetBtn = document.getElementById("resetBtn");
 
     let forbudte = [];
+    let currentRound = 0;
+    let countdown;
+
+    const bogstaverEfterFrekvens = [
+      "E", "R", "N", "T", "A", "I", "S", "L", "O", "D", "M", "G", "K", "U", "B", "V", "F", "H", "Æ", "P", "Ø", "Å", "J", "Y", "C", "X", "W", "Z", "Q"
+    ];
 
     const runder = {
       0: [],
-      1: ["Z", "Q", "W", "X"],
-      2: ["Z", "Q", "W", "X", "G", "B", "J", "Å"],
-      3: ["Z", "Q", "W", "X", "G", "B", "J", "Å", "D", "M", "K", "U"]
+      1: bogstaverEfterFrekvens.slice(-4),
+      2: bogstaverEfterFrekvens.slice(-8),
+      3: bogstaverEfterFrekvens.slice(-12),
+      4: bogstaverEfterFrekvens.slice(-16),
+      5: bogstaverEfterFrekvens.slice(),
     };
 
-    const sporgsmaal = {
-      0: "Skriv en beskrivelse af noget, du holder af i naturen. Hvorfor betyder det noget for dig?",
-      1: "Skriv samme tekst igen. Hvad begynder at føles besværligt? Hvilke ord må du ændre eller opgive?",
-      2: "Skriv nu noget om, hvorfor nogle ting i naturen virker uvigtige – men måske ikke er det. Hvad mangler du nu i sproget?",
-      3: "Skriv en refleksion: Hvordan hænger det, du oplever her, sammen med natur, tab og kompleksitet?"
-    };
+    const roundTimes = [15, 15, 15, 15, 15];
+
+    function procentMistede(runde) {
+      if (!runder[runde] || runder[runde].length === 0) return "0% mistet";
+      const procent = Math.round((runder[runde].length / 29) * 100);
+      return `${procent}% mistet`;
+    }
 
     function setRound(runde) {
+      currentRound = runde;
       forbudte = runder[runde];
-      forbudtEl.textContent = forbudte.length ? forbudte.join(", ") : "Ingen";
-      tekstfelt.value = "";
-      tekstfelt.focus();
-      sporgsmaalBox.textContent = sporgsmaal[runde];
+      forbudtEl.textContent = forbudte.length >= 29 ? "alle" : (forbudte.length ? forbudte.join(", ") : "Ingen");
+      mistedeContainer.style.display = "block";
+      resetBtn.style.display = "inline";
+      if (runde < 5) {
+        tekstfelt.value = "";
+        tekstfelt.focus();
+        tekstfelt.style.display = "block";
+        sporgsmaalBox.style.display = "block";
+        sporgsmaalBox.textContent = "Hvad værdsætter du især ved naturen?";
+        timerEl.textContent = "";
+      } else {
+        tekstfelt.style.display = "none";
+        sporgsmaalBox.style.display = "none";
+        timerEl.textContent = "";
+      }
     }
 
     function resetGame() {
+      clearInterval(countdown);
       forbudte = [];
+      currentRound = 0;
       forbudtEl.textContent = "";
       tekstfelt.value = "";
-      tekstfelt.focus();
-      sporgsmaalBox.textContent = "";
+      tekstfelt.style.display = "none";
+      sporgsmaalBox.style.display = "none";
+      mistedeContainer.style.display = "none";
+      resetBtn.style.display = "none";
+      sporgsmaalBox.textContent = "Hvad værdsætter du især ved naturen?";
+      timerEl.textContent = "";
+      tidligereSvarListe.innerHTML = "";
     }
 
     function checkInput(event) {
@@ -61,6 +149,46 @@
         }
       }
       tekstfelt.value = nyTekst;
+    }
+
+    function startAuto() {
+      setRound(0);
+      let sekunder = roundTimes[0];
+      timerEl.textContent = `Næste niveau om ${sekunder} sekunder...`;
+
+      countdown = setInterval(() => {
+        sekunder--;
+        timerEl.textContent = `Næste niveau om ${sekunder} sekunder...`;
+
+        if (sekunder <= 0) {
+          if (tekstfelt.style.display !== "none" && tekstfelt.value) {
+            const svarDiv = document.createElement("div");
+            svarDiv.className = "tidligereSvar";
+            svarDiv.textContent = `(${procentMistede(currentRound)}):\n` + tekstfelt.value;
+            tidligereSvarListe.prepend(svarDiv);
+          }
+
+          currentRound++;
+          if (currentRound > 5) {
+            clearInterval(countdown);
+            return;
+          }
+          setRound(currentRound);
+          if (currentRound < 5) {
+            sekunder = roundTimes[currentRound];
+            timerEl.textContent = `Næste niveau om ${sekunder} sekunder...`;
+          } else {
+            clearInterval(countdown);
+            forbudte = bogstaverEfterFrekvens.slice();
+            forbudtEl.textContent = "alle";
+            tekstfelt.value = "";
+            tekstfelt.style.display = "none";
+            tekstfelt.blur();
+            sporgsmaalBox.style.display = "none";
+            timerEl.textContent = "";
+          }
+        }
+      }, 1000);
     }
   </script>
 </body>
