@@ -2,20 +2,6 @@
 <html lang="da">
 <head>
   <meta charset="UTF-8">
-  <title>Savner ord</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      max-width: 600px;
-      margin: 2rem auto;
-      padding: 1rem;
-    }
-    textarea {
-      width: 100%;
-      height: 150px;
-      font-size: 1.2rem;
-      display: none;
-    }
     .mistede {
       font-weight: bold;
       color: darkred;
